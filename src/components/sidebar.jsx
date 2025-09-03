@@ -11,7 +11,7 @@ import {
 
 const navigation = [
   { name: 'Accounts', href: '/account', icon: UsersIcon, current: true },
-  { name: 'Transaction', href: '/transaction', icon: Money, current: false },
+  // { name: 'Transaction', href: '/transaction', icon: Money, current: false },
   { name: 'Bill Payment', href: '/bill', icon: FolderIcon, current: false },
   { name: 'Deposit', href: '/deposit', icon: CalendarIcon, current: false },
   { name: 'Help & Support', href: '/support', icon: InboxIcon, current: false },
