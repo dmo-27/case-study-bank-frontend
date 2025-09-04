@@ -29,6 +29,8 @@ import {
 } from '@heroicons/react/outline'
 import { SearchIcon } from '@heroicons/react/solid'
 import Sidebar from './sidebar'
+import Chatbot from './Chatbot';
+
 
 const navigation = [
   { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
@@ -49,7 +51,8 @@ function classNames(...classes) {
 }
 
 export default function Layout({children}) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [showChat, setShowChat] = useState(false);
 
   return (
     <>
@@ -167,6 +170,18 @@ export default function Layout({children}) {
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
+
+
+                  <div className="flex items-center justify-center h-screen bg-gray-100 relative">
+      <button
+        className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-700 transition"
+        onClick={() => setShowChat(true)}
+      >
+        Open Chatbot
+      </button>
+
+      {showChat && <Chatbot onClose={() => setShowChat(false)} />}
+    </div>
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="ml-3 relative">
