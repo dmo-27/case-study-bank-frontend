@@ -31,6 +31,8 @@ import { SearchIcon } from "@heroicons/react/solid";
 import Sidebar from "./sidebar";
 import { logout } from "../utils/auth";
 import { useNavigate } from "react-router";
+import Chatbot from './Chatbot';
+
 
 const navigation = [
   { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
@@ -50,8 +52,11 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+
 export default function Layout({ children }) {
+  const [showChat, setShowChat] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const navigate = useNavigate();
   return (
     <>
@@ -174,6 +179,18 @@ export default function Layout({ children }) {
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
+
+
+                  <div className="flex items-center justify-center h-screen bg-gray-100 relative">
+      <button
+        className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-700 transition"
+        onClick={() => setShowChat(true)}
+      >
+        Open Chatbot
+      </button>
+
+      {showChat && <Chatbot onClose={() => setShowChat(false)} />}
+    </div>
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="ml-3 relative">

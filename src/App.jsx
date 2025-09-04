@@ -16,12 +16,19 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/auth/protectedRoute";
 import PublicRoute from "./components/auth/publicRoute";
 
+import KYCVerificationPage from './Admin/pages/KYCVerficationPage'
+import AdminHomePage from './Admin/pages/HomePage'
+import AdminRoutes from './Admin/AdminRoutes'
+
 function App() {
   return (
     <>
       <Toaster position="bottom-right" reverseOrder={false} />
       <BrowserRouter>
         <Routes>
+          {/* <Route path = "/admin/kycverification" element = {<KYCVerificationPage/>}></Route>
+    <Route path = "/admin/home" element = {<AdminHomePage/>}></Route> */}
+    <Route path="/admin/*" element={<AdminRoutes />} />
           <Route
             path="/"
             element={
