@@ -39,6 +39,16 @@
       "password": "123456",
       "phone": "08693873153",
       "address": "pancham"
+    },
+    {
+      "id": "c922",
+      "firstName": "Dhanashree",
+      "lastName": "Otari",
+      "dob": "2003-11-27",
+      "email": "dhachamaotari@gmail.com",
+      "password": "Dmo@2025",
+      "phone": "8830542278",
+      "address": "Thane"
     }
   ]
 }

@@ -182,12 +182,12 @@ export default function Layout({ children }) {
 
 
                   <div className="flex items-center justify-center h-screen bg-gray-100 relative">
-      <button
+      {/* <button
         className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-700 transition"
         onClick={() => setShowChat(true)}
       >
         Open Chatbot
-      </button>
+      </button> */}
 
       {showChat && <Chatbot onClose={() => setShowChat(false)} />}
     </div>

@@ -17,9 +17,10 @@ export default function Chatbot({ onClose }) {
     setInput("");
 
     try {
-      const res = await axios.post("http://localhost:8082/customer/ask-chatbot", {
-        question: userMessage,
-      });
+     const res = await axios.post("http://localhost:8082/customer/ask-chatbot", {
+  question: userMessage,
+});
+
 
       console.log("Backend response:", res.data);
 
