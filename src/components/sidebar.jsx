@@ -13,7 +13,6 @@ import { useLocation } from 'react-router'
 
 
 const navigation = [
-<<<<<<< HEAD
   { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
   { name: 'Accounts', href: '/account', icon: UsersIcon },
   { name: 'Transaction', href: '/transaction', icon: CashIcon },
@@ -21,17 +20,6 @@ const navigation = [
   { name: 'Deposit', href: '/deposit', icon: CalendarIcon },
   { name: 'Help & Support', href: '/support', icon: InboxIcon },
 ];
-
-=======
-  { name: 'Accounts', href: '/account', icon: UsersIcon, current: true },
-  // { name: 'Transaction', href: '/transaction', icon: Money, current: false },
-  { name: 'Bill Payment', href: '/bill', icon: FolderIcon, current: false },
-  { name: 'Deposit', href: '/deposit', icon: CalendarIcon, current: false },
-  { name: 'Help & Support', href: '/support', icon: InboxIcon, current: false },
-//   { name: 'Reports', href: '#', icon: ChartBarIcon, current: false },
-]
->>>>>>> dmo
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
