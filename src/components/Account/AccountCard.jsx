@@ -15,7 +15,7 @@ const AccountCard = ({ account, onViewDetails }) => {
     }
   };
 
-  const getAccountTypeLabel = (type) => {
+  const getAccountTypeLabel = (type="") => {
     return type.charAt(0).toUpperCase() + type.slice(1) + " Account";
   };
 
