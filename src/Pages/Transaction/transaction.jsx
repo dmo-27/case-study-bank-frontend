@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Search, Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import TransactionModal from '../../components/Transaction/TransactionModal';
 import PinVerificationModal from '../../components/Transaction/PinVerficationModal';
+import TransactionDetailsModal from '../../components/Transaction/TransactionDetailModal';
 
 const transaction = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
+   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   // Mock data
   const [accounts] = useState([
@@ -223,7 +225,15 @@ const transaction = () => {
                         {formatCurrency(transaction.amount)}
                       </div>
                       <div className="text-sm text-gray-500">{formatDate(transaction.date)}</div>
+                      <button
+                  onClick={() => setSelectedTransaction(transaction)}
+                  className="mt-2 text-sm text-blue-600 hover:underline"
+                >
+                  View Details
+                </button>
                     </div>
+
+                    
                   </div>
                 </div>
               ))
@@ -240,6 +250,12 @@ const transaction = () => {
           onSubmit={handleTransactionSubmit}
         />
       )}
+
+       {/* Modal Component */}
+      <TransactionDetailsModal
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+      />
 
       {showPinModal && (
         <PinVerificationModal
