@@ -10,8 +10,6 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import CreateTicketModal from './../../components/Support/CreateSupportModal';
-// import Modal from '../../Admin/components/ui/Modal';
-// import Button from '../../Admin/components/ui/Button';
 import ViewTicketModal from '../../components/Support/ViewTicketModal';
 
 function Support() {

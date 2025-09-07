@@ -21,6 +21,7 @@ import AdminHomePage from './Admin/pages/HomePage'
 import AdminRoutes from './Admin/AdminRoutes'
 import Support from "./Pages/Support/support";
 import { SupportIcon } from "@heroicons/react/outline";
+import Deposit from "./Pages/Deposit/deposit";
 
 function App() {
   return (
@@ -97,10 +98,10 @@ function App() {
           <Route
             path="/deposit"
             element={
-              <ProtectedRoute>
-                {" "}
-                <Layout>{/* <Deposit /> */}</Layout>
-              </ProtectedRoute>
+            
+            
+                <Layout><Deposit /> </Layout>
+             
             }
           />
           <Route
