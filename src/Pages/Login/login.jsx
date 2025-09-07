@@ -1,18 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { set, useForm } from "react-hook-form";
 import { Link } from "react-router"; // use react-router-dom for v6+
-import { loginUser } from "../../api/index";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
+import { loginUser } from "../../api/UserApi";
+import OtpModal from "./otpModal"; // adjust path
 
 // Set cookie (expires after 1 hour)
-function setAuthCookie(email) {
-  const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
-  document.cookie = `pqr_auth=${encodeURIComponent(email)}; expires=${expires}; path=/`;
-}
+
 
 export default function Login() {
   const navigate = useNavigate();
+   const [otpOpen, setOtpOpen] = useState(false);
+  const [enteredEmail, setEnteredEmail] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -20,25 +21,20 @@ export default function Login() {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Login form submitted:", data);
-
-
-    loginUser(data.email, data.password)
+    loginUser({email: data.email, password: data.password})
       .then((response) => {
-        if (response.data.length > 0) {
-          setAuthCookie(data.email);
-          navigate("/dashboard");
-          toast.success("Login successful!");
+        if (response.data) {
+          setEnteredEmail(data.email);
+          setOtpOpen(true);
+          
         } else {
           toast.error("Invalid email or password. Please try again.");
         }
       })
       .catch((error) => {
-        console.error("Login error:", error);
-        alert("An error occurred during login. Please try again.");
+        toast.error("An error occurred during login. Please try again.");
       });
-    // API call or logic here
-  } 
+  }
   return (
     <>
       {/*
@@ -175,6 +171,8 @@ export default function Login() {
           />
         </div>
       </div>
+      <OtpModal open={otpOpen} email={enteredEmail} onClose={() => setOtpOpen(false)} />
+   
     </>
   );
 }

@@ -9,8 +9,8 @@ export const createAccount = (accountData) =>
   API.post("/createAccount", accountData);
 
 // 2. Get Account by ID
-export const getAccountById = (accountId) =>
-  API.get(`/${accountId}`);
+export const getAccountById = (customerId) =>
+  API.get(`/customers/${customerId}/accounts`);
 
 // 3. Get Account by Account Number
 export const getAccountByNumber = (accountNumber) =>

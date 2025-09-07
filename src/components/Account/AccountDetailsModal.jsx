@@ -20,15 +20,18 @@ const AccountDetailsModal = ({ account, onClose }) => {
         </h2>
 
         <div className="space-y-2 text-gray-700">
-          <p>
+          {/* <p>
             <span className="font-medium">Name:</span> {account.name}
-          </p>
+          </p> */}
           <p>
             <span className="font-medium">Account Number:</span>{" "}
             {account.accountNumber}
           </p>
           <p>
-            <span className="font-medium">Branch:</span> {account.branch}
+            <span className="font-medium">Branch:</span> {account.branchName}
+          </p>
+          <p>
+            <span className="font-medium">IFSC Code:</span> {account.ifscCode}
           </p>
           <p>
             <span className="font-medium">Status:</span>{" "}

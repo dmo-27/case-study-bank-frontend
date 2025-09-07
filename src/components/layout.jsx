@@ -32,6 +32,9 @@ import Sidebar from "./sidebar";
 import { logout } from "../utils/auth";
 import { useNavigate } from "react-router";
 import Chatbot from './Chatbot';
+import { persistor, useAppDispatch } from "../redux/store";
+import { clearUser } from "../redux/Slice/User";
+import { clearAccounts } from "../redux/Slice/AccountSlice";
 
 
 const navigation = [
@@ -53,11 +56,20 @@ function classNames(...classes) {
 }
 
 
+
 export default function Layout({ children }) {
   const [showChat, setShowChat] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const dispatch= useAppDispatch();
   const navigate = useNavigate();
+  const SignOut = () => {
+  logout();
+  navigate("/login");
+  dispatch(clearUser());
+  dispatch(clearAccounts());
+  persistor.purge();
+  }
+
   return (
     <>
       {/*
@@ -221,8 +233,7 @@ export default function Layout({ children }) {
                               <a
                                 onClick={() => {
                                   if (item.name === "Sign out") {
-                                    logout();
-                                    navigate("/login");
+                                    SignOut();
                                   }
                                 }}
                                 href={item.href}

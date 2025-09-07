@@ -1,8 +1,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router"; // Use react-router-dom for v6+
-import { registerUser } from "../../api";
 import toast from "react-hot-toast";
+import { registerUser } from "../../api/UserApi";
 
 
 export default function Register() {

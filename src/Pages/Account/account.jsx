@@ -5,25 +5,31 @@ import CreateAccountModal from '../../components/Account/CreateAccountModal';
 import AccountDetailsModal from '../../components/Account/AccountDetailsModal';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../redux/store';
-import { fetchAccounts, addAccount } from '../../redux/Slice/AccountSlice';
+import { replaceAccounts } from '../../redux/Slice/AccountSlice';
+import { getAccountsByCustomer } from '../../api/AccountsApi';
 
 
 function Accounts() {
   const dispatch = useAppDispatch();
   const { list: accounts, loading, error } = useSelector((state) => state.accounts);
-
+  const user = useSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   
   // Debug Redux state
-  console.log("🔹 Redux accounts state:", { accounts, loading, error });
+  // console.log("🔹 Redux accounts state:", { accounts, loading, error });
 
   // Fetch all accounts on mount
   useEffect(() => {
-    dispatch(fetchAccounts());
-  }, [dispatch]);
+    getAccountsByCustomer(user.userId)
+    .then(response => {
+      console.log("Fetched accounts:", response.data);
+      dispatch(replaceAccounts(response.data));
+    })
+    .catch(err => console.error("Error fetching accounts:", err));
+  }, []);
 
   // Create account handler
   const handleCreateAccount = (accountData) => {
@@ -52,11 +58,11 @@ const getTotalBalance = () => {
   const getAccountStats = () => {
     const stats = {
       total: accounts.length,
-      active: accounts.filter(acc => acc.status === 'active').length,
+      active: accounts.filter(acc => acc.status.toLowerCase() === 'active').length,
       byType: {
-        savings: accounts.filter(acc => acc.AccountType === 'savings').length,
-        salary: accounts.filter(acc => acc.type === 'salary').length,
-        current: accounts.filter(acc => acc.type === 'current').length,
+        savings: accounts.filter(acc => acc.accountType.toLowerCase() === 'savings').length,
+        salary: accounts.filter(acc => acc.accountType.toLowerCase() === 'salary').length,
+        current: accounts.filter(acc => acc.accountType.toLowerCase() === 'current').length,
       },
     };
     return stats;
@@ -67,7 +73,7 @@ const getTotalBalance = () => {
   const filteredAccounts = getAccountsByType(activeTab).filter(account =>
   account.accountHolderName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
   account.accountNumber?.includes(searchQuery) ||
-  account.branch?.toLowerCase().includes(searchQuery.toLowerCase())
+  account.branchName?.toLowerCase().includes(searchQuery.toLowerCase())
 );
 
   const formatCurrency = (amount) =>

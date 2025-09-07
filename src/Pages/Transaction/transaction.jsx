@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Search, Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import TransactionModal from '../../components/Transaction/TransactionModal';
 import PinVerificationModal from '../../components/Transaction/PinVerficationModal';
 import TransactionDetailsModal from '../../components/Transaction/TransactionDetailModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch } from '../../redux/store';
+import { getAccountsByCustomer } from '../../api/AccountsApi';
+import { getTransactionsForAccount } from '../../api/Transaction';
 
 const transaction = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
-   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const accounts = useSelector((state) => state.accounts.list);
 
-  // Mock data
-  const [accounts] = useState([
-    { id: '1', accountNumber: '****1234', accountName: 'Savings Account', balance: 15000.5 },
-    { id: '2', accountNumber: '****5678', accountName: 'Checking Account', balance: 8750.25 },
-    { id: '3', accountNumber: '****9012', accountName: 'Business Account', balance: 25000.0 }
-  ]);
-
+  useEffect(() => {
+    getTransactionsForAccount("ACCT1757233047592")
+    .then(response => {
+      console.log("Fetched transactions:", response.data);
+    })
+    .catch(err => console.error("Error fetching transactions:", err));
+  }
+  , []);
+  
   const [transactions, setTransactions] = useState([
     {
       id: '1',
@@ -135,7 +142,7 @@ const transaction = () => {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900">{account.accountName}</h3>
+                  <h3 className="font-semibold text-gray-900">{account.accountType}</h3>
                   <p className="text-sm text-gray-500">{account.accountNumber}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -170,14 +177,13 @@ const transaction = () => {
             Make Transaction
           </button>
         </div>
-
         {/* Transactions List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" >
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">Recent Transactions</h2>
           </div>
 
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100" >
             {filteredTransactions.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <div className="text-gray-400 mb-2">

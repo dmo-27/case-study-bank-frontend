@@ -34,18 +34,22 @@ const AccountCard = ({ account, onViewDetails }) => {
           <div className="flex-shrink-0">{getAccountIcon(account.type)}</div>
           <div className="flex-grow">
             <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              {getAccountTypeLabel(account.type)}
+              
+              {account.accountNumber}
             </h3>
             <p className="text-sm text-gray-600 mb-2">
-              Account {account.accountNumber}
+              {getAccountTypeLabel(account.accountType)}
             </p>
             <p className="text-sm text-blue-600 font-medium mb-3">
-              Branch: {account.branch}
+              Branch: {account.branchName}
+            </p>
+            <p className="text-sm text-blue-600 font-medium mb-3">
+              IFSC Code: {account.ifscCode}
             </p>
             <div className="flex items-center space-x-2">
               <span
                 className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                  account.status === "active"
+                  account.status.toLowerCase() === "active"
                     ? "bg-green-100 text-green-800"
                     : account.status === "inactive"
                     ? "bg-yellow-100 text-yellow-800"
