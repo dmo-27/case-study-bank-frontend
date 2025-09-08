@@ -20,6 +20,10 @@ export const getAccountByNumber = (accountNumber) =>
 export const getAccountsByCustomer = (customerId) =>
   API.get(`/customers/${customerId}/accounts`);
 
+
+export const getTransactionsForCustomer = (customerId) =>
+  API.get(`customers/${customerId}/transactions`);
+
 // 5. Get Balance info
 export const getAccountBalance = (accountId) =>
   API.get(`/${accountId}/balance`);

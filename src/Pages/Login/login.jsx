@@ -26,7 +26,6 @@ export default function Login() {
         if (response.data) {
           setEnteredEmail(data.email);
           setOtpOpen(true);
-          
         } else {
           toast.error("Invalid email or password. Please try again.");
         }

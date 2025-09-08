@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Shield, Eye, EyeOff } from 'lucide-react';
+import { createTransaction } from '../../api/AccountsApi';
+import axios from 'axios';
 
 const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
   const [pin, setPin] = useState(['', '', '', '']);
@@ -14,6 +16,7 @@ const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
     }
   }, []);
 
+  console.log('Transaction Data:', transactionData);
   const handlePinChange = (index, value) => {
     // Only allow numbers
     if (!/^\d*$/.test(value)) return;
@@ -37,25 +40,31 @@ const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const pinString = pin.join('');
-
-    if (pinString.length !== 4) {
-      alert('Please enter a complete 4-digit PIN');
-      return;
-    }
-
     setIsLoading(true);
 
-    // Simulate processing delay
-    setTimeout(() => {
-      setIsLoading(false);
-      onVerify(pinString);
-    }, 1500);
+    const transactionDetails = {
+      ...transactionData,
+      pin: pinString,
+      type: 'TRANSFER' // assuming type is always transfer for this modal
+    };
+    console.log('Submitting transaction with details:', transactionDetails);
+    axios.post("http://localhost:8083/accounts/createTransaction", transactionDetails)
+      .then(response => {
+        console.log('Transaction successful:', response.data);
+        setIsLoading(false);
+        onVerify(true);
+      })
+      .catch(error => {
+        console.error('Transaction failed:', error);
+      });
+
+    
   };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 

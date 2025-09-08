@@ -17,6 +17,7 @@ export const getTransactionById = (id) =>
 export const getTransactionsForAccount = (accountId) =>
   API.get(`/account/${accountId}`);
 
+
 // 4. Get mini statement for account (default 5, or pass limit)
 export const getMiniStatement = (accountId, limit = 5) =>
   API.get(`/account/${accountId}/mini-statement`, { params: { limit } });

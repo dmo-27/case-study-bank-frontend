@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router"; // Use react-router-dom for v6+
 import toast from "react-hot-toast";
 import { registerUser } from "../../api/UserApi";
+import OtpModal from "./otpModal";
 
 
 export default function Register() {
+     const [otpOpen, setOtpOpen] = useState(false);
+     const [enteredEmail, setEnteredEmail] = useState("");
   const navigate = useNavigate();
   const {
     register,
@@ -17,12 +20,11 @@ export default function Register() {
   const onSubmit = (data) => {
     console.log("Form Submitted:", data);
 
-    registerUser(data)
+    registerUser({...data, role: "USER"})
       .then((response) => {
         console.log("Registration successful:", response.data);
-        
-        navigate("/login");
-        toast.success("Registration successful! Please login.");
+        setEnteredEmail(data.email);
+        setOtpOpen(true);
         // Redirect to login or another page if needed
       })
       .catch((error) => {
@@ -119,13 +121,13 @@ export default function Register() {
                     {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
                   </div>
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
                       Phone Number
                     </label>
                     <input
-                      id="phone"
+                      id="phoneNumber"
                       type="tel"
-                      {...register("phone", {
+                      {...register("phoneNumber", {
                         required: "Phone number is required",
                         pattern: {
                           value: /^[0-9+\- ]{7,15}$/,
@@ -170,6 +172,7 @@ export default function Register() {
           </div>
         </div>
       </div>
+      <OtpModal isOpen={otpOpen} onClose={() => setOtpOpen(false)} enteredEmail={enteredEmail} />
     </>
   );
 }

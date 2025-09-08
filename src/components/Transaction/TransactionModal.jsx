@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { X, ChevronDown, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { getAccountByNumber } from '../../api/AccountsApi';
+import { set } from 'react-hook-form';
+import { getCustomerDetails } from '../../api/customerApi';
 
 const TransactionModal = ({ accounts, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    fromAccount: '',
+    fromAccountNumber: '',
     toAccountNumber: '',
     ifscCode: '',
     recipientName: '',
@@ -14,26 +17,41 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
   const [accountVerification, setAccountVerification] = useState({
     status: 'idle', // 'idle' | 'verifying' | 'verified' | 'failed'
     recipientName: '',
-    bankName: ''
+    branchName: ''
   });
   const [showTransactionForm, setShowTransactionForm] = useState(false);
-
+  const [toAccount, setToAccount] = useState(null);
   // Mock account verification function
-  const verifyAccount = async (accountNumber, ifscCode) => {
+  const verifyAccount = async (accountNumber) => {
     setAccountVerification({ status: 'verifying' });
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock verification logic - in real app, this would be an API call
-    const mockAccounts = [
-      { accountNumber: '1234567890', name: 'John Doe', bank: 'Chase Bank' },
-      { accountNumber: '9876543210', name: 'Jane Smith', bank: 'Bank of America' },
-      { accountNumber: '5555666677', name: 'Mike Johnson', bank: 'Wells Fargo' },
-      { accountNumber: '1111222233', name: 'Sarah Wilson', bank: 'Citibank' }
-    ];
-
-    const foundAccount = mockAccounts.find(acc => acc.accountNumber === accountNumber);
+    getAccountByNumber(accountNumber)
+      .then(response => {
+        console.log(response);
+        const account = response.data;
+        if (account) {
+          setToAccount(account);
+          getCustomerDetails(account.customerId)
+            .then(res => {
+              const customer = res.data;
+              setAccountVerification({
+                status: 'verified',
+                recipientName: customer.name,
+                branchName: account.branchName
+              });
+              setFormData(prev => ({ ...prev, recipientName: customer.name }));
+              setShowTransactionForm(true);
+            })
+            .catch(() => {
+              setAccountVerification({ status: 'failed' });
+            });
+        } else {
+          setAccountVerification({ status: 'failed' });
+        }
+      })
+      .catch(() => {
+        setAccountVerification({ status: 'failed' });
+      });
 
     if (foundAccount) {
       setAccountVerification({
@@ -65,7 +83,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.fromAccount || !formData.toAccountNumber || !formData.amount || !formData.description) {
+    if (!formData.fromAccountNumber || !formData.toAccountNumber || !formData.amount || !formData.description) {
       alert('Please fill in all required fields');
       return;
     }
@@ -81,11 +99,11 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 
-  const selectedAccount = accounts.find(acc => formData.fromAccount === `${acc.accountNumber} - ${acc.accountName}`);
+  const selectedAccount = accounts.find(acc => formData.fromAccountNumber === `${acc.accountNumber} - ${acc.accountName}`);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -173,7 +191,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
               </div>
               <div className="text-sm text-green-700">
                 <p><strong>Account Holder:</strong> {accountVerification.recipientName}</p>
-                <p><strong>Bank:</strong> {accountVerification.bankName}</p>
+                <p><strong>Branch:</strong> {accountVerification.branchName}</p>
               </div>
             </div>
           )}
@@ -211,8 +229,8 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
                     onClick={() => setShowAccountDropdown(!showAccountDropdown)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg text-left bg-white hover:bg-gray-50 transition-colors flex items-center justify-between"
                   >
-                    <span className={formData.fromAccount ? 'text-gray-900' : 'text-gray-500'}>
-                      {formData.fromAccount || 'Select account'}
+                    <span className={formData.fromAccountNumber ? 'text-gray-900' : 'text-gray-500'}>
+                      {formData.fromAccountNumber || 'Select account'}
                     </span>
                     <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showAccountDropdown ? 'rotate-180' : ''}`} />
                   </button>
@@ -224,7 +242,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
                           key={account.id}
                           type="button"
                           onClick={() => {
-                            setFormData(prev => ({ ...prev, fromAccount: `${account.accountNumber} - ${account.accountName}` }));
+                            setFormData(prev => ({ ...prev, fromAccountNumber: `${account.accountNumber}` }));
                             setShowAccountDropdown(false);
                           }}
                           className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
@@ -302,7 +320,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
               </button>
               <button
                 type="submit"
-                disabled={!formData.fromAccount || !formData.toAccountNumber || !formData.amount || !formData.description || (selectedAccount && parseFloat(formData.amount || '0') > selectedAccount.balance)}
+                disabled={!formData.fromAccountNumber || !formData.toAccountNumber || !formData.amount || !formData.description || (selectedAccount && parseFloat(formData.amount || '0') > selectedAccount.balance)}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue

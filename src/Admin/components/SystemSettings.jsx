@@ -29,7 +29,7 @@ const SystemSettings = () => {
     business: {
       dailyTransactionLimit: '100000',
       fraudThreshold: '10000',
-      currencyCode: 'USD',
+      currencyCode: 'INR',
       businessHours: '09:00-17:00',
       timezone: 'UTC'
     }
@@ -66,7 +66,7 @@ const SystemSettings = () => {
       business: {
         dailyTransactionLimit: '100000',
         fraudThreshold: '10000',
-        currencyCode: 'USD',
+        currencyCode: 'INR',
         businessHours: '09:00-17:00',
         timezone: 'UTC'
       }

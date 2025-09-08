@@ -3,10 +3,11 @@ import { Search, Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import TransactionModal from '../../components/Transaction/TransactionModal';
 import PinVerificationModal from '../../components/Transaction/PinVerficationModal';
 import TransactionDetailsModal from '../../components/Transaction/TransactionDetailModal';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../redux/store';
-import { getAccountsByCustomer } from '../../api/AccountsApi';
-import { getTransactionsForAccount } from '../../api/Transaction';
+import { getTransactionsForCustomer, getAccountsByCustomer } from '../../api/AccountsApi';
+import toast from "react-hot-toast";
+import { replaceAccounts } from '../../redux/Slice/AccountSlice';
 
 const transaction = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,63 +16,83 @@ const transaction = () => {
   const [transactionData, setTransactionData] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const accounts = useSelector((state) => state.accounts.list);
-
+  const [transactions, setTransactions] = useState([]);
+  const user = useSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const [transactionCompleted, setTransactionCompleted] = useState(false);
   useEffect(() => {
-    getTransactionsForAccount("ACCT1757233047592")
-    .then(response => {
-      console.log("Fetched transactions:", response.data);
+    getAccountsByCustomer(user.userId)
+    .then((response) => {
+      dispatch(replaceAccounts(response.data));
     })
-    .catch(err => console.error("Error fetching transactions:", err));
-  }
-  , []);
-  
-  const [transactions, setTransactions] = useState([
-    {
-      id: '1',
-      type: 'credit',
-      amount: 2500.0,
-      description: 'Salary Deposit',
-      date: '2025-01-15',
-      accountNumber: '****1234',
-      recipient: 'ABC Company'
-    },
-    {
-      id: '2',
-      type: 'debit',
-      amount: 150.0,
-      description: 'Grocery Shopping',
-      date: '2025-01-14',
-      accountNumber: '****1234',
-      recipient: 'SuperMart'
-    },
-    {
-      id: '3',
-      type: 'debit',
-      amount: 75.5,
-      description: 'Electric Bill',
-      date: '2025-01-13',
-      accountNumber: '****5678',
-      recipient: 'Power Company'
-    },
-    {
-      id: '4',
-      type: 'credit',
-      amount: 1000.0,
-      description: 'Freelance Payment',
-      date: '2025-01-12',
-      accountNumber: '****9012',
-      recipient: 'Client XYZ'
-    },
-    {
-      id: '5',
-      type: 'debit',
-      amount: 200.0,
-      description: 'Online Purchase',
-      date: '2025-01-11',
-      accountNumber: '****1234',
-      recipient: 'E-commerce Store'
-    }
-  ]);
+    .catch((err) => console.error("Error fetching accounts for customer:", err));
+  }, [transactionCompleted]);
+
+ useEffect(() => {
+  getTransactionsForCustomer(user.userId)
+    .then((response) => {
+      
+      const userAccountNumbers = accounts.map(acct => acct.accountNumber);
+      let mapped = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      mapped = response.data.map(txn => {
+        let mappedType, accountNumber, recipient;
+
+        const fromIsUser = userAccountNumbers.includes(txn.fromAccountNumber);
+        const toIsUser = userAccountNumbers.includes(txn.toAccountNumber);
+
+        console.log({ fromIsUser, toIsUser, txn });
+
+        if (txn.type === "DEPOSIT") {
+          mappedType = "credit";
+          accountNumber = txn.toAccountNumber;
+          recipient = txn.description || txn.fromAccountNumber || "Deposit";
+        } else if (txn.type === "WITHDRAWAL") {
+          mappedType = "debit";
+          accountNumber = txn.fromAccountNumber;
+          recipient = txn.description || txn.toAccountNumber || "Withdrawal";
+        } else if (txn.type === "TRANSFER") {
+          if (fromIsUser && toIsUser) {
+            // Self transfer
+            mappedType = "self";
+            accountNumber = txn.fromAccountNumber;
+            recipient = `To ${txn.toAccountNumber}`;
+          } else if (fromIsUser) {
+            mappedType = "debit";
+            accountNumber = txn.fromAccountNumber;
+            recipient = txn.toAccountNumber;
+          } else if (toIsUser) {
+            mappedType = "credit";
+            accountNumber = txn.toAccountNumber;
+            recipient = txn.fromAccountNumber;
+          } else {
+            mappedType = "debit";
+            accountNumber = txn.fromAccountNumber;
+            recipient = txn.toAccountNumber;
+          }
+        }
+
+        // Mask last 4 digits of account for UI
+        function maskAccount(accnum) {
+          if (!accnum) return "";
+          return `****${accnum.slice(-4)}`;
+        }
+
+        return {
+          id: String(txn.transactionId),
+          type: mappedType, // will be 'credit', 'debit', or 'self'
+          amount: txn.amount,
+          description: txn.description,
+          date: txn.createdAt || "",
+          accountNumber: accountNumber,
+          recipient: recipient
+        };
+      });
+
+      setTransactions(mapped);
+    })
+    .catch((err) => console.error("Error fetching transactions for customer:", err));
+}, [transactionCompleted]);
+
 
   const filteredTransactions = transactions.filter(
     (transaction) =>
@@ -84,45 +105,42 @@ const transaction = () => {
     setTransactionData(data);
     setShowTransactionModal(false);
     setShowPinModal(true);
+    
   };
 
-  const handlePinVerification = (pin) => {
+  const handlePinVerification = (response) => {
     // Simulate PIN verification (PIN: 1234)
-    if (pin === '1234') {
-      const newTransaction = {
-        id: Date.now().toString(),
-        type: 'debit',
-        amount: parseFloat(transactionData.amount),
-        description: transactionData.description,
-        date: new Date().toISOString().split('T')[0],
-        accountNumber: transactionData.fromAccount.split(' - ')[0],
-        recipient: `Account ${transactionData.toAccountNumber}`
-      };
 
-      setTransactions((prev) => [newTransaction, ...prev]);
+      if(response) {
+        
       setShowPinModal(false);
       setTransactionData(null);
+      setTransactionCompleted(prev => !prev);
+      toast.success('Transaction successful!');
+      
 
-      alert('Transaction completed successfully!');
     } else {
-      alert('Invalid PIN. Please try again.');
+      toast.error('Invalid PIN. Transaction failed.');
     }
   };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  return new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -194,7 +212,7 @@ const transaction = () => {
             ) : (
               filteredTransactions.map((transaction) => (
                 <div
-                  key={transaction.id}
+                  key={transaction.transactionId}
                   className="px-6 py-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
@@ -203,7 +221,9 @@ const transaction = () => {
                         className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                           transaction.type === 'credit'
                             ? 'bg-green-100 text-green-600'
-                            : 'bg-red-100 text-red-600'
+                            : transaction.type === 'self' 
+                              ? 'bg-gray-100 text-gray-600'
+                              : 'bg-red-100 text-red-600'
                         }`}
                       >
                         {transaction.type === 'credit' ? (
@@ -217,17 +237,21 @@ const transaction = () => {
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <span>{transaction.recipient}</span>
                           <span>•</span>
-                          <span>{transaction.accountNumber}</span>
+                          <span>FROM {transaction.accountNumber}</span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div
                         className={`text-lg font-semibold ${
-                          transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                          transaction.type === 'credit'
+                            ? ' text-green-600'
+                            : transaction.type === 'self' 
+                              ? ' text-gray-600'
+                              : ' text-red-600'
                         }`}
                       >
-                        {transaction.type === 'credit' ? '+' : '-'}
+                        {transaction.type === 'credit' ? '+' : transaction.type === 'self' ? '' : '-'}
                         {formatCurrency(transaction.amount)}
                       </div>
                       <div className="text-sm text-gray-500">{formatDate(transaction.date)}</div>
