@@ -39,3 +39,6 @@ export const createTransaction = (transactionData) =>
 // 8. Get All Accounts
 export const getAllAccounts = () =>
   API.get("/all");
+
+export const getAllBranches = () => 
+  API.get("/getAllBranches");

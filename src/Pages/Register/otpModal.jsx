@@ -42,7 +42,7 @@ export default function OtpModal({ open, email, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+    <div className="otp fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
         <h2 className="text-xl font-bold mb-4 text-center">Enter OTP</h2>
         <form onSubmit={handleSubmit(onSubmit)}>

@@ -19,12 +19,18 @@ export default function Register() {
   // Form submit handler
   const onSubmit = (data) => {
     console.log("Form Submitted:", data);
-
+    
+    // console.log(otpOpen)
     registerUser({...data, role: "USER"})
       .then((response) => {
         console.log("Registration successful:", response.data);
-        setEnteredEmail(data.email);
-        setOtpOpen(true);
+        if (response.data) {
+          setEnteredEmail(data.email);
+          setOtpOpen(true);
+        } else {
+          toast.error("Registration failed! Please try again.");
+        }
+        
         // Redirect to login or another page if needed
       })
       .catch((error) => {
@@ -172,7 +178,8 @@ export default function Register() {
           </div>
         </div>
       </div>
-      <OtpModal isOpen={otpOpen} onClose={() => setOtpOpen(false)} enteredEmail={enteredEmail} />
+      {/* <OtpModal isOpen={true} onClose={() => setOtpOpen(false)} enteredEmail={enteredEmail} /> */}
+      <OtpModal open={otpOpen} onClose={() => setOtpOpen(false)} email={enteredEmail} />
     </>
   );
 }

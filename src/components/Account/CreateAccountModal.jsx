@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Plus } from "lucide-react";
+import { getAllBranches } from "../../api/AccountsApi";
 
 const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
+  const [branches, setBranches] = useState([])
   const [formData, setFormData] = useState({
     type: "savings",
     branch: "",
@@ -11,18 +13,18 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
 
   const [errors, setErrors] = useState({});
 
-  const branches = [
-    "Chennai",
-    "Delhi",
-    "Mumbai",
-    "Bangalore",
-    "Kolkata",
-    "Hyderabad",
-    "Pune",
-    "Ahmedabad",
-    "Jaipur",
-    "Lucknow",
-  ];
+
+  useEffect(() => {
+    getAllBranches()
+      .then((res) => {
+        console.log("Branches fetched:", res.data);
+        setBranches(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching branches:", err);
+      });
+  }, []);
+  
 
   const validateForm = () => {
     const newErrors = {};
