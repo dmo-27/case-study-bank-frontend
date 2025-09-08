@@ -3,9 +3,10 @@ import { Search, Plus, Edit, UserCheck, UserX, Crown } from 'lucide-react';
 import { useBankingAdmin } from '../context/BankingAdminContext';
 import Modal from './ui/Modal';
 import Button from './ui/Button';
+import {toast} from "react-hot-toast";
 
 const UserManagement = () => {
-  const { users, loading, updateUser } = useBankingAdmin();
+  const { users, loading, updateUser ,toggleUserStatus } = useBankingAdmin();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,14 +14,19 @@ const UserManagement = () => {
   const [isCreateMode, setIsCreateMode] = useState(false);
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch =
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const firstName = user.firstName || '';
+  const lastName = user.lastName || '';
+  const email = user.email || '';
 
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    return matchesSearch && matchesRole;
-  });
+  const matchesSearch =
+    firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.toLowerCase().includes(searchTerm.toLowerCase());
+
+  const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+  return matchesSearch && matchesRole;
+});
+
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
@@ -34,10 +40,10 @@ const UserManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusToggle = (user) => {
-    const newStatus = user.status === 'active' ? 'inactive' : 'active';
-    updateUser(user.id, { status: newStatus });
-  };
+const handleStatusToggle = async (user) => {
+  await toggleUserStatus(user);
+};
+
 
   const getRoleColor = (role) => {
     switch (role) {
@@ -123,8 +129,8 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+              {filteredUsers.map((user,index) => (
+                <tr key={user.id || index} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
@@ -140,10 +146,11 @@ const UserManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {user.status === 'active' ? <UserCheck className="h-3 w-3 mr-1" /> : <UserX className="h-3 w-3 mr-1" />}
-                      {user.status}
-                    </span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(user.active)}`}>
+  {user.active ? <UserCheck className="h-3 w-3 mr-1" /> : <UserX className="h-3 w-3 mr-1" />}
+  {user.active ? 'Active' : 'Inactive'}
+</span>
+
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {new Date(user.lastLogin).toLocaleDateString()} {new Date(user.lastLogin).toLocaleTimeString()}
@@ -157,9 +164,9 @@ const UserManagement = () => {
                     </button>
                     <button
                       onClick={() => handleStatusToggle(user)}
-                      className={`${user.status === 'active' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'} transition-colors`}
+                      className={`${user.active === true ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'} transition-colors`}
                     >
-                      {user.status === 'active' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                      {user.active === true ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                     </button>
                   </td>
                 </tr>
