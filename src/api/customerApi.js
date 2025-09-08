@@ -44,7 +44,10 @@ export const markTicketResolved = (customerId, ticketId) =>
 
 // 9. Upload KYC document (CustomerKycDto)
 export const uploadKycDocument = (customerKycDto) =>
-  API.post("/uploadKyc", customerKycDto);
+  API.post("/kyc/upload", customerKycDto);
+
+export const getAllKycByCustomer = (customerId) =>
+  API.get(`/kyc/getAll/${customerId}`);
 
 // 10. Get login history for customer
 export const getLoginHistory = (customerId) =>

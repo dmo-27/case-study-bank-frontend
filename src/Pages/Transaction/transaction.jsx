@@ -62,8 +62,8 @@ const transaction = () => {
             recipient = txn.toAccountNumber;
           } else if (toIsUser) {
             mappedType = "credit";
-            accountNumber = txn.toAccountNumber;
-            recipient = txn.fromAccountNumber;
+            accountNumber = txn.fromAccountNumber;
+            recipient = txn.toAccountNumber;
           } else {
             mappedType = "debit";
             accountNumber = txn.fromAccountNumber;

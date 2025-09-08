@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { X, Plus } from "lucide-react";
 import { getAllBranches } from "../../api/AccountsApi";
+import { createAccount } from "../../api/customerApi";
+import PinModal from "./pinModal";
+import { useSelector } from "react-redux";
 
-const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
-  const [branches, setBranches] = useState([])
+const CreateAccountModal = ({ isOpen, onClose }) => {
+  const [branches, setBranches] = useState([]);
   const [formData, setFormData] = useState({
-    type: "savings",
-    branch: "",
+    accountType: "savings",
+    branchId: 0,
     accountHolderName: "",
     initialBalance: 0,
   });
-
+  const [isPinModalOpen, setPinModalOpen] = useState(false);
+  const [pendingAccountData, setPendingAccountData] = useState();
+  const [isCreating, setIsCreating] = useState(false);
   const [errors, setErrors] = useState({});
-
-
+  const user = useSelector((state) => state.user);
   useEffect(() => {
     getAllBranches()
       .then((res) => {
@@ -24,7 +28,6 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
         console.error("Error fetching branches:", err);
       });
   }, []);
-  
 
   const validateForm = () => {
     const newErrors = {};
@@ -33,17 +36,16 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
       newErrors.accountHolderName = "Account holder name is required";
     }
 
-    if (!formData.branch) {
-      newErrors.branch = "Branch selection is required";
+    if (!formData.branchId) {
+      newErrors.branchId = "Branch selection is required";
     }
 
     if (formData.initialBalance < 0) {
       newErrors.initialBalance = "Initial balance must be positive";
     }
 
-    if (formData.type === "savings" && formData.initialBalance < 500) {
-      newErrors.initialBalance =
-        "Minimum balance for savings account is ₹500";
+    if (formData.accountType === "savings" && formData.initialBalance < 500) {
+      newErrors.initialBalance = "Minimum balance for savings account is ₹500";
     }
 
     setErrors(newErrors);
@@ -53,15 +55,8 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      onCreateAccount(formData);
-      setFormData({
-        type: "savings",
-        branch: "",
-        accountHolderName: "",
-        initialBalance: 0,
-      });
-      setErrors({});
-      onClose();
+      setPendingAccountData(formData); // Save form data for the pin modal
+      setPinModalOpen(true); // Show pin modal
     }
   };
 
@@ -70,6 +65,28 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const finalSubmit = (finalData) => {
+
+    setIsCreating(true);
+    console.log("Final data to submit:", { ...finalData, customerId: user.userId });
+    // Call the create account API
+    // setIsCreating(false);
+    
+    createAccount({ ...finalData, customerId: user.userId })
+    .then((res) => {
+      console.log("Account created:", res.data);
+      setIsCreating(false);
+      setPinModalOpen(false);
+      onClose(); // Close the create account modal
+    })
+    .catch((err) => {
+      console.error("Error creating account:", err);
+      setIsCreating(false);
+      // Handle error (e.g., show toast)
+    }
+    );
   };
 
   if (!isOpen) return null;
@@ -95,13 +112,13 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
               Account Type
             </label>
             <select
-              value={formData.type}
-              onChange={(e) => handleInputChange("type", e.target.value)}
+              value={formData.accountType}
+              onChange={(e) => handleInputChange("accountType", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="savings">Savings Account</option>
-              <option value="salary">Salary Account</option>
-              <option value="current">Current Account</option>
+              <option value="SAVINGS">Savings Account</option>
+              <option value="SALARY">Salary Account</option>
+              <option value="CURRENT">Current Account</option>
             </select>
           </div>
 
@@ -132,21 +149,21 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
               Branch
             </label>
             <select
-              value={formData.branch}
-              onChange={(e) => handleInputChange("branch", e.target.value)}
+              value={formData.branchId}
+              onChange={(e) => handleInputChange("branchId", Number(e.target.value) || 0)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.branch ? "border-red-300" : "border-gray-300"
+                errors.branchId ? "border-red-300" : "border-gray-300"
               }`}
             >
-              <option value="">Select Branch</option>
+              <option value="0">Select Branch</option>
               {branches.map((branch) => (
-                <option key={branch} value={branch}>
-                  {branch}
+                <option key={branch.branchId} value={branch.branchId}>
+                  {branch.branchName}
                 </option>
               ))}
             </select>
-            {errors.branch && (
-              <p className="text-red-500 text-xs mt-1">{errors.branch}</p>
+            {errors.branchId && (
+              <p className="text-red-500 text-xs mt-1">{errors.branchId}</p>
             )}
           </div>
 
@@ -176,9 +193,11 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
               </p>
             )}
             <p className="text-gray-500 text-xs mt-1">
-              {formData.type === "savings" && "Minimum balance: ₹500"}
-              {formData.type === "current" && "No minimum balance required"}
-              {formData.type === "salary" && "No minimum balance required"}
+              {formData.accountType === "savings" && "Minimum balance: ₹500"}
+              {formData.accountType === "current" &&
+                "No minimum balance required"}
+              {formData.accountType === "salary" &&
+                "No minimum balance required"}
             </p>
           </div>
 
@@ -200,6 +219,15 @@ const CreateAccountModal = ({ isOpen, onClose, onCreateAccount }) => {
           </div>
         </form>
       </div>
+      {isPinModalOpen && (
+      <PinModal
+        accountData={pendingAccountData}
+        isOpen={true}
+        onClose={() => setPinModalOpen(false)}
+        isLoading={isCreating}
+        onSubmit={finalSubmit}
+      />
+    )}
     </div>
   );
 };

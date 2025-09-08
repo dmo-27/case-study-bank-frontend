@@ -276,7 +276,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
                   Amount <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
                   <input
                     type="number"
                     step="0.01"

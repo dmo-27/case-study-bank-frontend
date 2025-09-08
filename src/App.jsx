@@ -22,6 +22,7 @@ import AdminRoutes from './Admin/AdminRoutes'
 import Support from "./Pages/Support/support";
 import { SupportIcon } from "@heroicons/react/outline";
 import Deposit from "./Pages/Deposit/deposit";
+import Kyc from "./components/Kyc/kyc";
 
 function App() {
   return (
@@ -108,6 +109,13 @@ function App() {
             path="/support"
             element={ 
                 <Layout><Support/></Layout>
+            
+            }
+          ></Route>
+          <Route
+            path="/kyc"
+            element={ 
+                <Layout><Kyc /></Layout>
             
             }
           ></Route>

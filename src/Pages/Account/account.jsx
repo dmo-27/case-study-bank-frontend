@@ -17,7 +17,7 @@ function Accounts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  
+  const [accountCreated, setAccountCreated] = useState(false);
   // Debug Redux state
   // console.log("🔹 Redux accounts state:", { accounts, loading, error });
 
@@ -29,13 +29,8 @@ function Accounts() {
       dispatch(replaceAccounts(response.data));
     })
     .catch(err => console.error("Error fetching accounts:", err));
-  }, []);
+  }, [accountCreated]);
 
-  // Create account handler
-  const handleCreateAccount = (accountData) => {
-    dispatch(addAccount(accountData));
-    setIsCreateModalOpen(false);
-  };
 
 const getTotalBalance = () => {
   return accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
@@ -251,8 +246,10 @@ const getTotalBalance = () => {
       {/* Create Account Modal */}
       <CreateAccountModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreateAccount={handleCreateAccount}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setAccountCreated(prev => !prev); // Trigger refresh on close
+        }}
       />
 
       {/* Account Details Modal */}
