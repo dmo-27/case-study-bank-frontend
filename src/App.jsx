@@ -22,6 +22,8 @@ import AdminRoutes from './Admin/AdminRoutes'
 import Support from "./Pages/Support/support";
 import { SupportIcon } from "@heroicons/react/outline";
 import Deposit from "./Pages/Deposit/deposit";
+import About from "./components/About";
+import Resources from "./components/Resources";
 
 function App() {
   return (
@@ -111,6 +113,26 @@ function App() {
             
             }
           ></Route>
+
+
+          <Route
+  path="/about"
+  element={
+  
+      <About />
+    
+  }
+/>
+
+
+<Route
+  path="/resources"
+  element={
+    
+      <Resources/>
+  
+  }
+/>
         </Routes>
       </BrowserRouter>
     </>
