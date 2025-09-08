@@ -69,3 +69,6 @@ export const askChatbotQuestion = (question) =>
 // 14. Create account for customer
 export const createAccount = (accountRequestDto) =>
   API.post("/createAccount", accountRequestDto);
+
+
+export const listAllCustomers = () => API.get("/listAll");

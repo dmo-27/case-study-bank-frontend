@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8083/accounts", // base path for AccountController
+  baseURL: "http://localhost:8084/accounts", // base path for AccountController
 });
 
 // 1. Create Account

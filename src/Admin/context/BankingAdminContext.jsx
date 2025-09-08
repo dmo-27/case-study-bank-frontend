@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateMockData } from '../utils/mockData';
+import { listAllCustomers } from '../../api/customerApi';
+import { deactivateCustomer } from '../../api/AdminApi';
+import { toast } from 'react-hot-toast';
 
 // Context without TypeScript types
 const BankingAdminContext = createContext(undefined);
@@ -13,14 +16,30 @@ export const BankingAdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchCustomers();
     const data = generateMockData();
-    setUsers(data.users);
+    
     setTransactions(data.transactions);
     setAccounts(data.accounts);
     setTickets(data.tickets);
     setLogs(data.logs);
     setLoading(false);
   }, []);
+
+
+  const fetchCustomers = async () => {
+  try {
+    setLoading(true);
+    const res = await listAllCustomers();
+    setUsers(res.data);
+    console.log("Fetched customers:", res.data);
+  } catch (err) {
+    console.error("Error fetching customers", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const refreshData = () => {
     setLoading(true);
@@ -63,6 +82,27 @@ export const BankingAdminProvider = ({ children }) => {
     setTickets(prev => prev.map(ticket => ticket.id === id ? { ...ticket, ...updates } : ticket));
   };
 
+  const toggleUserStatus = async (user) => {
+  try {
+    console.log("Toggling status for user:", user);
+    if (user.active === true) {
+      console.log(user.active);
+      await deactivateCustomer(user.customerId); // Calls backend API
+
+      setUsers(prev => prev.map(u => u.customerId === user.customerId ? { ...u, active: false } : u));
+      toast.success(`Deactivated ${user.firstName}`);
+    } else {
+      toast.error("Reactivation not implemented");
+    }
+
+  
+
+  } catch (error) {
+    toast.error("Failed to toggle status");
+  }
+};
+
+
   const value = {
     users,
     transactions,
@@ -76,6 +116,7 @@ export const BankingAdminProvider = ({ children }) => {
     reverseTransaction,
     flagTransaction,
     updateTicket,
+    toggleUserStatus
   };
 
   return (
