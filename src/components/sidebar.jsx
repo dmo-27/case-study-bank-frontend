@@ -16,7 +16,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: UsersIcon },
   { name: 'Accounts', href: '/account', icon: UsersIcon },
   { name: 'Transaction', href: '/transaction', icon: CashIcon },
-  { name: 'Bill Payment', href: '/bill', icon: FolderIcon },
+  // { name: 'Bill Payment', href: '/bill', icon: FolderIcon },
   { name: 'Deposit', href: '/deposit', icon: CalendarIcon },
   { name: 'Help & Support', href: '/support', icon: InboxIcon },
   { name: 'Kyc', href: '/kyc', icon: InboxIcon },

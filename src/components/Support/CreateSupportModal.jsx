@@ -1,26 +1,34 @@
 import React, { useState } from 'react';
 import { X, ChevronDown, AlertCircle, MessageSquare } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { createSupportTicket } from '../../api/customerApi';
 
 const CreateTicketModal = ({ onClose, onCreate }) => {
   const [formData, setFormData] = useState({
-    title: '',
+    subject: '',
     description: '',
     priority: 'medium'
   });
 
+  const user = useSelector((state) => state.user);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newTicket = {
-      id: Date.now().toString(),
-      title: formData.title,
+      subject: formData.subject,
       description: formData.description,
-      user: 'current_user',
-      priority: formData.priority,
-      status: 'open',
-      created: new Date().toLocaleDateString()
+      customerId: user.userId
     };
-    onCreate(newTicket);
-    setFormData({ title: '', description: '', priority: 'medium' });
+
+    createSupportTicket(newTicket)
+      .then((response) => {
+        console.log('Ticket created:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error creating ticket:', error);
+        alert('Failed to create ticket. Please try again.');
+      });
+    setFormData({ subject: '', description: '', priority: 'medium' });
   };
 
   return (
@@ -45,15 +53,15 @@ const CreateTicketModal = ({ onClose, onCreate }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
               Ticket Title *
             </label>
             <input
               type="text"
-              id="title"
+              id="subject"
               required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              value={formData.subject}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               placeholder="Brief description of your issue"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -72,26 +80,6 @@ const CreateTicketModal = ({ onClose, onCreate }) => {
               placeholder="Please provide detailed information..."
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
-          </div>
-          
-          <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-              Priority Level
-            </label>
-            <div className="relative">
-              <select
-                id="priority"
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
-              >
-                <option value="low">Low - General inquiry</option>
-                <option value="medium">Medium - Standard request</option>
-                <option value="high">High - Important issue</option>
-                <option value="critical">Critical - Outage/security issue</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-            </div>
           </div>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
