@@ -16,13 +16,16 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/auth/protectedRoute";
 import PublicRoute from "./components/auth/publicRoute";
 
-import KYCVerificationPage from './Admin/pages/KYCVerficationPage'
-import AdminHomePage from './Admin/pages/HomePage'
-import AdminRoutes from './Admin/AdminRoutes'
+import KYCVerificationPage from "./Admin/pages/KYCVerficationPage";
+import AdminHomePage from "./Admin/pages/HomePage";
+import AdminRoutes from "./Admin/AdminRoutes";
 import Support from "./Pages/Support/support";
 import { SupportIcon } from "@heroicons/react/outline";
 import Deposit from "./Pages/Deposit/deposit";
+
 import Kyc from "./components/Kyc/kyc";
+import About from "./components/About";
+import Resources from "./components/Resources";
 
 function App() {
   return (
@@ -32,7 +35,7 @@ function App() {
         <Routes>
           {/* <Route path = "/admin/kycverification" element = {<KYCVerificationPage/>}></Route>
     <Route path = "/admin/home" element = {<AdminHomePage/>}></Route> */}
-    <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
           <Route
             path="/"
             element={
@@ -99,26 +102,31 @@ function App() {
           <Route
             path="/deposit"
             element={
-            
-            
-                <Layout><Deposit /> </Layout>
-             
+              <Layout>
+                <Deposit />{" "}
+              </Layout>
             }
           />
           <Route
             path="/support"
-            element={ 
-                <Layout><Support/></Layout>
-            
+            element={
+              <Layout>
+                <Support />
+              </Layout>
             }
           ></Route>
           <Route
             path="/kyc"
-            element={ 
-                <Layout><Kyc /></Layout>
-            
+            element={
+              <Layout>
+                <Kyc />
+              </Layout>
             }
           ></Route>
+
+          <Route path="/about" element={<About />} />
+
+          <Route path="/resources" element={<Resources />} />
         </Routes>
       </BrowserRouter>
     </>
