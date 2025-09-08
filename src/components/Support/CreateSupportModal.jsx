@@ -23,6 +23,7 @@ const CreateTicketModal = ({ onClose, onCreate }) => {
     createSupportTicket(newTicket)
       .then((response) => {
         console.log('Ticket created:', response.data);
+        onClose();
       })
       .catch((error) => {
         console.error('Error creating ticket:', error);
