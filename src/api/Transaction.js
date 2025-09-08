@@ -13,6 +13,8 @@ export const createTransaction = (transactionRequestDto) =>
 export const getTransactionById = (id) =>
   API.get(`/get/${id}`);
 
+
+
 // 3. Get all transactions for an account
 export const getTransactionsForAccount = (accountId) =>
   API.get(`/account/${accountId}`);
@@ -37,3 +39,6 @@ export const getFlaggedTransactions = () =>
 // 8. Get daily counts for admin (pass from/to as YYYY-MM-DD)
 export const getDailyCounts = (from, to) =>
   API.get("/admin/daily-counts", { params: { from, to } });
+
+export const getAllTransaction = () =>
+  API.get("/all");

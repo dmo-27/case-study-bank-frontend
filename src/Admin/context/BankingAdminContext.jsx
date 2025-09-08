@@ -3,6 +3,8 @@ import { generateMockData } from '../utils/mockData';
 import { listAllCustomers } from '../../api/customerApi';
 import { deactivateCustomer } from '../../api/AdminApi';
 import { toast } from 'react-hot-toast';
+import { getAllAccounts } from '../../api/AccountsApi';
+import { getAllTransaction} from '../../api/Transaction';
 
 // Context without TypeScript types
 const BankingAdminContext = createContext(undefined);
@@ -17,14 +19,43 @@ export const BankingAdminProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCustomers();
+     fetchAccounts();
+     fetchTransactions();
+     fetchRecentActivities();
+     fetchTickets();
     const data = generateMockData();
+
+    console.log(accounts);
     
-    setTransactions(data.transactions);
-    setAccounts(data.accounts);
-    setTickets(data.tickets);
-    setLogs(data.logs);
+    
+  
+ 
+    
     setLoading(false);
   }, []);
+
+
+  const fetchTickets = async () => {
+  try {
+    setLoading(true);
+    const res = await getAllTickets();
+    // Map your DB columns to frontend-friendly keys
+    const mappedTickets = res.data.map(t => ({
+      id: t.ticketId, // TICKET_ID
+      createdAt: t.createdAt ? new Date(t.createdAt) : null, // handle date
+      description: t.description,
+      status: t.status,
+      subject: t.subject,
+      customerId: t.customerId,
+      email: t.email,
+    }));
+    setTickets(mappedTickets);
+  } catch (err) {
+    console.error("Error fetching tickets", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   const fetchCustomers = async () => {
@@ -99,6 +130,84 @@ export const BankingAdminProvider = ({ children }) => {
 
   } catch (error) {
     toast.error("Failed to toggle status");
+  }
+};
+
+// In BankingAdminProvider, after fetching accounts:
+const fetchAccounts = async () => {
+  try {
+    setLoading(true);
+    const res = await getAllAccounts();
+    // Map backend DB columns to expected frontend keys
+    const mappedAccounts = res.data.map(a => ({
+      id: a.accountId, // from ACCOUNT_ID
+      accountNumber: a.accountNumber,
+      userId: a.customerId,    // change this if you want to show email or something else!
+      accountType: a.accountType,
+      balance: a.balance,
+      status: a.status,
+      createdAt: new Date(a.createdAt),    // parse to Date object if string
+      lastActivity: new Date(a.updatedAt),
+      // add others if needed
+      email: a.email
+    }));
+    setAccounts(mappedAccounts);
+  } catch (err) {
+    console.error("Error fetching accounts", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const fetchTransactions = async () => {
+  try {
+    setLoading(true);
+    const res = await getAllTransactions();
+    const mappedTransactions = res.data.map(t => ({
+      id: t.id,
+      reference: t.id.toString(), // or customize, if you have a better "reference"
+      amount: t.amount,
+      createdAt: new Date(t.createdAt),
+      description: t.description,
+      flagReason: t.flagReason,
+      flagged: t.flagged === 1, // DB 1/0 -> JS true/false
+      flaggedAt: t.flaggedAt ? new Date(t.flaggedAt) : null,
+      flaggedBy: t.flaggedBy,
+      fromAccountNumber: t.fromAccountNumber,
+      toAccountNumber: t.toAccountNumber,
+      status: t.status,
+      type: t.type,
+      // For your table's "accountId" column, decide what to show:
+      accountId: t.fromAccountNumber, // Or t.toAccountNumber, or combine them, as you prefer
+    }));
+    setTransactions(mappedTransactions);
+  } catch (err) {
+    console.error("Error fetching transactions", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const fetchRecentActivities = async () => {
+  try {
+    setLoading(true);
+    const res = await getRecentActivities();
+    // Map Oracle fields to JS-friendly properties if backend doesn't do so
+    const mappedLogs = res.data.map(log => ({
+      id: log.id,
+      actionType: log.actionType,
+      adminId: log.adminId,
+      details: log.details,
+      targetId: log.targetId,
+      targetType: log.targetType,
+      timestamp: log.timestamp ? new Date(log.timestamp) : null, // parse to Date
+    }));
+    setLogs(mappedLogs);
+  } catch (err) {
+    console.error("Error fetching activity logs", err);
+  } finally {
+    setLoading(false);
   }
 };
 

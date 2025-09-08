@@ -40,6 +40,8 @@ export const markTicketResolved = (customerId, ticketId) =>
     params: { customerId, ticketId }
   });
 
+  export const getAllTickets = () =>
+  API.get('/listAllTickets');
 // -------------------------- KYC Section -------------------------
 
 // 9. Upload KYC document (CustomerKycDto)

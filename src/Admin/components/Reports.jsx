@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Download, Calendar, FileText, TrendingUp, Users, CreditCard, Activity } from 'lucide-react';
 import Button from './ui/Button';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { useBankingAdmin } from '../context/BankingAdminContext';
 
 const Reports = () => {
+  const { users, transactions, accounts, loading } = useBankingAdmin();
+
   const [selectedReportType, setSelectedReportType] = useState('accounts');
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString().split('T')[0],
@@ -10,6 +15,13 @@ const Reports = () => {
   });
 
   const reportTypes = [
+    {
+      id: 'users',
+      name: 'User Activity Report',
+      description: 'User login patterns and behavior analysis',
+      icon: Users,
+      color: 'purple'
+    },
     {
       id: 'accounts',
       name: 'Account Summary Report',
@@ -24,44 +36,8 @@ const Reports = () => {
       icon: Activity,
       color: 'green'
     },
-    {
-      id: 'users',
-      name: 'User Activity Report',
-      description: 'User login patterns and behavior analysis',
-      icon: Users,
-      color: 'purple'
-    },
-    {
-      id: 'fraud',
-      name: 'Fraud Detection Report',
-      description: 'Flagged transactions and suspicious activities',
-      icon: TrendingUp,
-      color: 'red'
-    }
-  ];
-
-  const scheduledReports = [
-    {
-      id: '1',
-      name: 'Daily Transaction Summary',
-      schedule: 'Daily at 9:00 AM',
-      lastRun: '2024-12-01 09:00',
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'Weekly Account Report',
-      schedule: 'Weekly on Monday',
-      lastRun: '2024-11-25 08:00',
-      status: 'active'
-    },
-    {
-      id: '3',
-      name: 'Monthly Fraud Analysis',
-      schedule: 'Monthly on 1st',
-      lastRun: '2024-11-01 10:00',
-      status: 'paused'
-    }
+    
+    
   ];
 
   const handleGenerateReport = () => {
@@ -75,21 +51,30 @@ const Reports = () => {
     alert(`${reportTypes.find(t => t.id === selectedReportType)?.name} generated successfully!`);
   };
 
-  const getStatusColor = (status) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+  const handleDownloadPDF = async () => {
+    const input = document.getElementById('report-table');
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('l', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`${selectedReportType}-report.pdf`);
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-        <p className="text-gray-600 mt-1">Generate and schedule comprehensive reports</p>
+        <p className="text-gray-600 mt-1">Generate and export detailed system reports</p>
       </div>
 
-      {/* Report Generation */}
+      {/* Report Type Selection */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Generate Report</h2>
-        
+       
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {reportTypes.map((type) => (
             <div
@@ -135,73 +120,133 @@ const Reports = () => {
             />
           </div>
           <div className="flex items-end">
-            <Button
+            {/* <Button
               onClick={handleGenerateReport}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
               <Download className="h-4 w-4 mr-2" />
               Generate Report
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
 
-      {/* Scheduled Reports */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      {/* Report Table + Export */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Scheduled Reports</h2>
-          <Button className="bg-green-600 hover:bg-green-700">
-            <Calendar className="h-4 w-4 mr-2" />
-            Schedule New
+          <h2 className="text-xl font-semibold text-gray-900">
+            {reportTypes.find(t => t.id === selectedReportType)?.name}
+          </h2>
+          <Button onClick={handleDownloadPDF} className="bg-blue-600 hover:bg-red-700">
+            <Download className="h-4 w-4 mr-2" />
+            Export to PDF
           </Button>
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {scheduledReports.map((report) => (
-                <tr key={report.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-400 mr-3" />
-                      <span className="text-sm font-medium text-gray-900">{report.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.schedule}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.lastRun}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                      {report.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3 transition-colors">
-                      Edit
-                    </button>
-                    <button className="text-green-600 hover:text-green-900 mr-3 transition-colors">
-                      Run Now
-                    </button>
-                    <button className="text-red-600 hover:text-red-900 transition-colors">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <div id="report-table" className="overflow-x-auto">
+          {loading ? (
+            <p className="text-gray-500">Loading data...</p>
+          ) : (
+            <>
+              {selectedReportType === 'accounts' && (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2">Account Number</th>
+                      <th className="px-4 py-2">Type</th>
+                      <th className="px-4 py-2">Balance</th>
+                      <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">User ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accounts.map(account => (
+                      <tr key={account.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{account.accountNumber}</td>
+                        <td className="px-4 py-2">{account.accountType}</td>
+                        <td className="px-4 py-2">₹{account.balance}</td>
+                        <td className="px-4 py-2">{account.status}</td>
+                        <td className="px-4 py-2">{account.userId}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {selectedReportType === 'transactions' && (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2">Reference</th>
+                      <th className="px-4 py-2">Amount</th>
+                      <th className="px-4 py-2">From</th>
+                      <th className="px-4 py-2">To</th>
+                      <th className="px-4 py-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map(txn => (
+                      <tr key={txn.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{txn.reference}</td>
+                        <td className="px-4 py-2">₹{txn.amount}</td>
+                        <td className="px-4 py-2">{txn.fromAccountNumber}</td>
+                        <td className="px-4 py-2">{txn.toAccountNumber}</td>
+                        <td className="px-4 py-2">{txn.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {selectedReportType === 'users' && (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2">Customer ID</th>
+                      <th className="px-4 py-2">Name</th>
+                      <th className="px-4 py-2">Email</th>
+                      <th className="px-4 py-2">Active</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.customerId} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{user.customerId}</td>
+                        <td className="px-4 py-2">{user.name}</td>
+                        <td className="px-4 py-2">{user.email}</td>
+                        <td className="px-4 py-2">{user.active ? 'Yes' : 'No'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* {selectedReportType === 'fraud' && (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2">Transaction ID</th>
+                      <th className="px-4 py-2">Amount</th>
+                      <th className="px-4 py-2">Flag Reason</th>
+                      <th className="px-4 py-2">Flagged By</th>
+                      <th className="px-4 py-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.filter(t => t.flagged).map(txn => (
+                      <tr key={txn.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">{txn.id}</td>
+                        <td className="px-4 py-2">₹{txn.amount}</td>
+                        <td className="px-4 py-2">{txn.flagReason}</td>
+                        <td className="px-4 py-2">{txn.flaggedBy}</td>
+                        <td className="px-4 py-2">{txn.flaggedAt?.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )} */}
+            </>
+          )}
         </div>
       </div>
     </div>
