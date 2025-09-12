@@ -77,3 +77,7 @@ export const createAccount = (accountRequestDto) =>
 
 
 export const listAllCustomers = () => API.get("/listAll");
+
+export const getAllKycDocuments = () => API.get("/kyc/getAll");
+
+export const updateKyc = (CustomerKycStatusUpdateDto) => API.put('/kyc/status', CustomerKycStatusUpdateDto);

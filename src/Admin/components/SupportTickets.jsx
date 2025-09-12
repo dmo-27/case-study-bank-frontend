@@ -1,5 +1,4 @@
-// src/Admin/components/SupportTickets.jsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Clock, AlertTriangle, CheckCircle, ArrowUp } from 'lucide-react';
 import { useBankingAdmin } from '../context/BankingAdminContext';
 import Modal from './ui/Modal';
@@ -7,16 +6,25 @@ import Button from './ui/Button';
 
 const SupportTickets = () => {
   const { tickets, loading, updateTicket } = useBankingAdmin();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Derived counts
+  const counts = useMemo(() => {
+    const open = tickets.filter(t => t.status === 'open').length;
+    const inProgress = tickets.filter(t => t.status === 'in-progress').length;
+    const resolved = tickets.filter(t => t.status === 'resolved').length;
+    return { open, inProgress, resolved };
+  }, [tickets]);
+
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch =
-      ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.userId.toLowerCase().includes(searchTerm.toLowerCase());
+      (ticket.subject || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (ticket.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (ticket.customerId || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
     return matchesSearch && matchesPriority;
   });
@@ -26,17 +34,20 @@ const SupportTickets = () => {
     setIsModalOpen(true);
   };
 
-  const handleEscalateTicket = (ticketId) => {
-    updateTicket(ticketId, { 
-      status: 'escalated', 
-      escalatedAt: new Date(),
-      priority: 'critical'
+  // Rename Escalate -> In Progress
+  const handleMarkInProgress = (ticketId) => {
+    updateTicket(ticketId, {
+      status: 'in-progress',
+      // Keep a timestamp if you track it
+      inProgressAt: new Date(),
+      // Optional: bump priority if you want (commented out)
+      // priority: 'high',
     });
   };
 
   const handleResolveTicket = (ticketId) => {
-    updateTicket(ticketId, { 
-      status: 'resolved', 
+    updateTicket(ticketId, {
+      status: 'resolved',
       resolvedAt: new Date()
     });
   };
@@ -56,7 +67,6 @@ const SupportTickets = () => {
       case 'open': return 'bg-blue-100 text-blue-800';
       case 'in-progress': return 'bg-yellow-100 text-yellow-800';
       case 'resolved': return 'bg-green-100 text-green-800';
-      case 'escalated': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -65,7 +75,6 @@ const SupportTickets = () => {
     const createdAt = new Date(ticket.createdAt);
     const hoursSinceCreation = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
     const slaHours = ticket.priority === 'critical' ? 1 : ticket.priority === 'high' ? 4 : 24;
-
     if (ticket.status === 'resolved') return null;
     return hoursSinceCreation > slaHours ? 'breached' : 'within';
   };
@@ -89,38 +98,23 @@ const SupportTickets = () => {
         <p className="text-gray-600 mt-1">Manage customer support tickets and SLA monitoring</p>
       </div>
 
-      {/* SLA Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      {/* Overview counts: Open, In Progress, Resolved */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
             <Clock className="h-8 w-8 text-blue-500 mr-3" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {tickets.filter(t => t.status === 'open').length}
-              </p>
-              <p className="text-sm text-gray-600">Open Tickets</p>
+              <p className="text-2xl font-bold text-gray-900">{counts.open}</p>
+              <p className="text-sm text-gray-600">Open</p>
             </div>
           </div>
         </div>
-        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <AlertTriangle className="h-8 w-8 text-red-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {tickets.filter(t => t.slaBreached).length}
-              </p>
-              <p className="text-sm text-gray-600">SLA Breached</p>
-            </div>
-          </div>
-        </div> */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <ArrowUp className="h-8 w-8 text-orange-500 mr-3" />
+            <ArrowUp className="h-8 w-8 text-yellow-500 mr-3" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {tickets.filter(t => t.status === 'escalated').length}
-              </p>
-              <p className="text-sm text-gray-600">Escalated</p>
+              <p className="text-2xl font-bold text-gray-900">{counts.inProgress}</p>
+              <p className="text-sm text-gray-600">In Progress</p>
             </div>
           </div>
         </div>
@@ -128,9 +122,7 @@ const SupportTickets = () => {
           <div className="flex items-center">
             <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {tickets.filter(t => t.status === 'resolved').length}
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{counts.resolved}</p>
               <p className="text-sm text-gray-600">Resolved</p>
             </div>
           </div>
@@ -172,16 +164,13 @@ const SupportTickets = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredTickets.map((ticket) => {
-                const slaStatus = getSLAStatus(ticket);
                 const createdAt = new Date(ticket.createdAt);
                 return (
                   <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
@@ -192,27 +181,13 @@ const SupportTickets = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {ticket.userId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
+                      {ticket.customerId || ticket.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
                         {ticket.status}
                       </span>
                     </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                      {slaStatus && (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          slaStatus === 'breached' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                        }`}>
-                          {slaStatus === 'breached' ? 'Breached' : 'Within SLA'}
-                        </span>
-                      )}
-                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {createdAt.toLocaleDateString()}
                     </td>
@@ -223,14 +198,18 @@ const SupportTickets = () => {
                       >
                         View
                       </button>
-                      {ticket.status !== 'escalated' && ticket.status !== 'resolved' && (
+
+                      {/* Show "In Progress" only when ticket is open */}
+                      {ticket.status === 'open' && (
                         <button
-                          onClick={() => handleEscalateTicket(ticket.id)}
-                          className="text-orange-600 hover:text-orange-900 transition-colors"
+                          onClick={() => handleMarkInProgress(ticket.id)}
+                          className="text-yellow-600 hover:text-yellow-900 transition-colors"
                         >
-                          Escalate
+                          In Progress
                         </button>
                       )}
+
+                      {/* Allow resolve when not already resolved */}
                       {ticket.status !== 'resolved' && (
                         <button
                           onClick={() => handleResolveTicket(ticket.id)}
@@ -243,6 +222,13 @@ const SupportTickets = () => {
                   </tr>
                 );
               })}
+              {filteredTickets.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-6 text-center text-gray-500">
+                    No tickets found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -290,6 +276,7 @@ const SupportTickets = () => {
                 </p>
               </div>
             </div>
+
             {selectedTicket.slaBreached && (
               <div className="bg-red-50 p-4 rounded-lg">
                 <div className="flex items-center">
@@ -298,18 +285,21 @@ const SupportTickets = () => {
                 </div>
               </div>
             )}
+
             <div className="flex justify-end space-x-3 pt-4">
-              {selectedTicket.status !== 'escalated' && selectedTicket.status !== 'resolved' && (
+              {/* In Progress only if currently open */}
+              {selectedTicket.status === 'open' && (
                 <Button
                   onClick={() => {
-                    handleEscalateTicket(selectedTicket.id);
+                    handleMarkInProgress(selectedTicket.id);
                     setIsModalOpen(false);
                   }}
-                  variant="danger"
+                  className="bg-yellow-500 hover:bg-yellow-600"
                 >
-                  Escalate
+                  In Progress
                 </Button>
               )}
+              {/* Resolve if not resolved */}
               {selectedTicket.status !== 'resolved' && (
                 <Button
                   onClick={() => {

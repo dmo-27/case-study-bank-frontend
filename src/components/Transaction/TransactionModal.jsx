@@ -27,13 +27,14 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
 
     getAccountByNumber(accountNumber)
       .then(response => {
-        console.log(response);
+        
         const account = response.data;
         if (account) {
           setToAccount(account);
           getCustomerDetails(account.customerId)
             .then(res => {
               const customer = res.data;
+              console.log(customer)
               setAccountVerification({
                 status: 'verified',
                 recipientName: customer.name,
@@ -276,7 +277,7 @@ const TransactionModal = ({ accounts, onClose, onSubmit }) => {
                   Amount <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
                   <input
                     type="number"
                     step="0.01"

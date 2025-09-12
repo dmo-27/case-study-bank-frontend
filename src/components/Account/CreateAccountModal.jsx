@@ -167,7 +167,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Initial Balance (₹)
             </label>
@@ -199,7 +199,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
               {formData.accountType === "salary" &&
                 "No minimum balance required"}
             </p>
-          </div>
+          </div> */}
 
           <div className="flex space-x-3 pt-4">
             <button

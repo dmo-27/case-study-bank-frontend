@@ -116,8 +116,9 @@ const TransactionMonitoring = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th> */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FromAccount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ToAccount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -130,14 +131,14 @@ const TransactionMonitoring = () => {
                 <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900">{transaction.reference}</span>
+                      <span className="text-sm font-medium text-gray-900">{transaction.fromAccountNumber}</span>
                       {transaction.flagged && (
                         <AlertTriangle className="h-4 w-4 text-red-500 ml-2" />
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {transaction.accountId}
+                    {transaction.toAccountNumber}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`text-sm font-medium ${getTypeColor(transaction.type)}`}>
@@ -145,7 +146,7 @@ const TransactionMonitoring = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${transaction.amount.toLocaleString()}
+                    ₹{transaction.amount.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
@@ -170,14 +171,7 @@ const TransactionMonitoring = () => {
                         <Flag className="h-4 w-4" />
                       </button>
                     )}
-                    {transaction.status === 'completed' && !transaction.reversedAt && (
-                      <button
-                        onClick={() => reverseTransaction(transaction.id)}
-                        className="text-red-600 hover:text-red-900 transition-colors"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </button>
-                    )}
+                    {/* {transactix``` */}
                   </td>
                 </tr>
               ))}

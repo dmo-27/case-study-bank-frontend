@@ -12,6 +12,7 @@ import SupportTickets from "./components/SupportTickets";
 import AdminLogs from "./components/AdminLogs";
 import SystemHealth from "./components/SystemHealth";
 import { BankingAdminProvider } from "./context/BankingAdminContext";
+import KycManagement from "./components/KycManagement";
 
 export default function AdminRoutes() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -40,6 +41,7 @@ export default function AdminRoutes() {
                    <Route path="settings" element={<SystemSettings />} />
                    <Route path="transactions" element={<TransactionMonitoring />} />
                    <Route path="accounts" element={<AccountManagement />}/>
+                   <Route path="kyc-management" element={<KycManagement />} />
             
             </Routes>
           </div>

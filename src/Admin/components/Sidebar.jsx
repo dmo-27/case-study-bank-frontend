@@ -24,9 +24,9 @@ const Sidebar = ({ collapsed, onToggleCollapse }) => {
     { id: "transactions", label: "Transaction Monitor", icon: Activity },
     { id: "reports", label: "Reports", icon: FileText },
     { id: "support", label: "Support Tickets", icon: Headphones },
-    { id: "logs", label: "Admin Logs", icon: Shield },
+    { id: "kyc-management", label: "Kyc Management", icon: Settings },
+    // { id: "logs", label: "Admin Logs", icon: Shield },
     // { id: "health", label: "System Health", icon: HeartPulse },
-    // { id: "settings", label: "Settings", icon: Settings },
   ];
 
   return (

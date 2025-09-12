@@ -31,9 +31,13 @@ const transaction = () => {
  useEffect(() => {
   getTransactionsForCustomer(user.userId)
     .then((response) => {
+      console.log("Fetched transactions for customer:", response.data);
       
       const userAccountNumbers = accounts.map(acct => acct.accountNumber);
       let mapped = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      mapped = mapped.filter(txn =>
+        (txn.type != "DEPOSIT")
+       );
       mapped = response.data.map(txn => {
         let mappedType, accountNumber, recipient;
 

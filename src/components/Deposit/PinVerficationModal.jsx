@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Shield, Eye, EyeOff } from 'lucide-react';
 import { createTransaction } from '../../api/AccountsApi';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
   const [pin, setPin] = useState(['', '', '', '']);
@@ -44,11 +45,13 @@ const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
 
     const transactionDetails = {
       ...transactionData,
+      fromAccountNumber: transactionData.toAccountNumber,
       pin: pinString,
-      type: 'TRANSFER' // assuming type is always transfer for this modal
+      type: 'DEPOSIT' // assuming type is always transfer for this modal
     };
-    console.log('Submitting transaction with details:', transactionDetails);
-    axios.post("http://localhost:8083/accounts/createTransaction", transactionDetails)
+    // console.log('Submitting transaction with details:', transactionDetails);
+    console.log("Submitted data", transactionDetails)
+    createTransaction(transactionDetails)
       .then(response => {
         console.log('Transaction successful:', response.data);
         setIsLoading(false);
@@ -56,6 +59,8 @@ const PinVerificationModal = ({ onClose, onVerify, transactionData }) => {
       })
       .catch(error => {
         console.error('Transaction failed:', error);
+        toast.error('Transaction failed. Please check your PIN and try again.');
+        setIsLoading(false);
       });
 
     

@@ -74,12 +74,12 @@ const PinModal = ({ onClose, onSubmit, accountData, isLoading }) => {
                   {accountData?.branchId}
                 </span>
               </div>
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span className="text-sm text-gray-700">Initial Balance:</span>
                 <span className="text-sm font-semibold text-green-600">
                   ₹{parseFloat(accountData?.initialBalance || 0).toFixed(2)}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           {/* PIN Input Form */}

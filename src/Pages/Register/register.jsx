@@ -42,8 +42,8 @@ export default function Register() {
 
   return (
     <>
-      <div className="min-h-full flex">
-        <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div className="min-h-full flex items-center justify-center">
+        <div className="flex-1 flex shadow-lg rounded-lg flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
               <img

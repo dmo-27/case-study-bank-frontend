@@ -5,6 +5,7 @@ import { deactivateCustomer } from '../../api/AdminApi';
 import { toast } from 'react-hot-toast';
 import { getAllAccounts } from '../../api/AccountsApi';
 import { getAllTransaction} from '../../api/Transaction';
+import { getAllTickets } from '../../api/customerApi';
 
 // Context without TypeScript types
 const BankingAdminContext = createContext(undefined);
@@ -41,7 +42,7 @@ export const BankingAdminProvider = ({ children }) => {
     const res = await getAllTickets();
     // Map your DB columns to frontend-friendly keys
     const mappedTickets = res.data.map(t => ({
-      id: t.ticketId, // TICKET_ID
+      id: t.id, // TICKET_ID
       createdAt: t.createdAt ? new Date(t.createdAt) : null, // handle date
       description: t.description,
       status: t.status,
@@ -49,6 +50,8 @@ export const BankingAdminProvider = ({ children }) => {
       customerId: t.customerId,
       email: t.email,
     }));
+
+    console.log(mappedTickets)
     setTickets(mappedTickets);
   } catch (err) {
     console.error("Error fetching tickets", err);
@@ -118,9 +121,9 @@ export const BankingAdminProvider = ({ children }) => {
     console.log("Toggling status for user:", user);
     if (user.active === true) {
       console.log(user.active);
-      await deactivateCustomer(user.customerId); // Calls backend API
+      await deactivateCustomer(user.id); // Calls backend API
 
-      setUsers(prev => prev.map(u => u.customerId === user.customerId ? { ...u, active: false } : u));
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, active: false } : u));
       toast.success(`Deactivated ${user.firstName}`);
     } else {
       toast.error("Reactivation not implemented");
@@ -163,7 +166,7 @@ const fetchAccounts = async () => {
 const fetchTransactions = async () => {
   try {
     setLoading(true);
-    const res = await getAllTransactions();
+    const res = await getAllTransaction();
     const mappedTransactions = res.data.map(t => ({
       id: t.id,
       reference: t.id.toString(), // or customize, if you have a better "reference"
